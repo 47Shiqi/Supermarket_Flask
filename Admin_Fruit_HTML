@@ -1,0 +1,90 @@
+<html>
+	<head>
+		<title>Fruit</title>
+		<link rel="stylesheet" href="\static\sections.css">
+		<script src="\static\sections.js"></script>
+	</head>
+
+	<body>
+		<form action="/fruitinfo" method="post" id="FruitForm">
+            <br><br>
+			<table style="width:90%; margin: 0 auto;">
+				<tr>
+					<td id="dptmimage" style="text-align:left;"><img src="{{ url_for('static', filename='fruits.jpg') }}" width="127px"></td>
+					<td id="title" style="text-align:center; width:90%"><h1>Fruit Section!</h1></td>
+					<td id="home" style="text-align:right;">
+						<button id="btnhome" type="button" onclick="window.location.href='/adminhome'"><h3>Home<h3></button>
+					</td>
+				</tr>
+			</table>
+
+            <br><br><br><br>
+            <div id="items">
+            	<table style="width:90%" id="tblitems">	
+					<tr>
+						<th style="font-size:30px; width:40%">Image</th>
+                        <th style="font-size:30px; width:60%">Product Information</th>
+						<td id="add" rowspan="2" style="vertical-align:bottom;"><button type="button" id="btnadd">Add</button></td>
+					</tr>
+                    <tr>
+						<td>
+							<table style="margin: 0 auto;">
+								<tr>
+									<td id="img" style="vertical-align: top;"><select id="Selectimg" name="Selectimg">
+											<option value="ProductPic.jpg">No Image</option>
+											<option value="Apple.jpg">Apple</option>
+											<option value="Banana.jpg">Banana</option>
+											<option value="Orange.jpg">Orange</option>
+											<option value="Strawberry.jpg">Strawberry</option>
+										</select>
+									</td>
+									<td id="img"><img id="displayimage" src="/static/ProductPic.jpg" width="97px"></td>
+									<td id="img" style="vertical-align: bottom;"><button id="btnview" type="button">Change Image</button></td>
+								</tr>
+							</table>
+						</td>
+						
+                        <td>
+							<table style="margin: 0 auto;">
+								<tr>
+									<td id="productname"><label id="lblproductname">Product Name:</label></td>
+									<td id="productname"><input id="txtproductname" name="txtproductname"></input></td>
+								</tr>
+								<tr>
+									<td id="productprice"><label id="lblproductprice">Product Price: $</label></td>
+									<td id="productprice"><input id="txtproductprice" name="txtproductprice"></input></td>
+								</tr>
+								<tr>
+									<td id="unit"><label id="lblunit">Unit:</label></td>
+									<td id="unit"><input id="txtunit" name="txtunit"></input></td>
+								</tr>
+							</table>
+						</td>
+					</tr>
+				</table>
+				<table style="width:90%" id="tbaddedinfo">
+                <tr>
+					{% for header in headings %}
+						<th style="width:25%">{{header}}</th>
+					{% endfor %}
+				</tr>
+                
+				{% for row in data %}
+				<tr>
+					
+					{% for cell in row %}
+						{% if cell.endswith('.jpg')%}
+							<td><img src="{{ url_for('static', filename=cell) }}" width="80px"></td>
+						{% else %}
+							<td>{{cell}}</td>
+						{% endif %}
+					{% endfor %}
+
+				</tr>
+				{% endfor %}
+			</table>
+			</div>
+		</form>
+	</body>
+</html>
+
