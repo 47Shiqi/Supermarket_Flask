@@ -1,0 +1,316 @@
+from flask import Flask, render_template, request, redirect
+import os.path
+from os import path
+
+app = Flask(__name__)
+
+#Admin DPTM TitlePictures and SampleProductPictures(Beverage-Halal)
+#Get values of buttons and match case the departments
+#Admin DPTMs submit Post buttons
+
+@app.route("/")
+def main():
+    return render_template("Login.html")
+
+@app.route("/info",methods=["POST"])
+def GetInfo():
+    global username,userpasswd
+    global fileDir
+    fileDir = os.path.dirname(os.path.realpath("__file__"));
+
+    username = request.form.get('txtusername');
+    userpasswd = request.form.get('txtpassword');
+    usermsg = request.form.get('usermsg');
+
+    if(usermsg == "Admin"):
+        return render_template("DepartmentsAdmin.html",username = username);
+    else:
+        return CheckUser();
+
+def CheckUser():
+    userfilename = username + ".doc";
+    IfExist(userfilename);
+    
+    if(TorF == "false"):
+        CreateFile(userfilename)
+        Append(userfilename,userpasswd);
+        print("Account is created")
+    else:
+        print("Account is logged in")
+        adminfile = open(userfilename,"r+");
+        fileitems = adminfile.read().split(";");
+        if(fileitems[0] != userpasswd):
+            errormsg = "Incorrect password!"
+            return render_template("Login.html", errormsg = errormsg);
+
+    return render_template("DepartmentsUser.html",username = username);
+        
+def IfExist(thefile):
+    global TorF;
+    fileexist = bool(path.exists(thefile));
+    if(fileexist == False):
+        TorF = "false";
+    else:
+        TorF = "true";
+
+def CreateFile(filename):
+    adminfile = open(filename,"x");
+    adminfile.close();
+
+def Append(name,info):
+    adminfile = open(name,"a");
+    adminfile.write(info + ";");
+    adminfile.close();
+
+@app.route("/fruit")
+def fruit():
+    global FileName,HtmlName
+    FileName = "Fruit.doc"
+    HtmlName = "Fruit.html"
+    print("Welcome to fruit section")
+    return GeneralProcess(FileName,HtmlName)
+
+def GeneralProcess(dptmFileName,dptmHtmlName):
+    IfExist(dptmFileName);
+    if(TorF == "false"):
+        return render_template(dptmHtmlName);
+    else:
+        adminfile = open(dptmFileName,"r+")
+        allInfo = adminfile.read();
+        thelength = len(allInfo);
+        if(thelength == 0):
+            return render_template(dptmHtmlName);
+        else:
+            Retrieve(dptmFileName);
+            headings = ("Image","Product","Price","Unit")
+            return render_template(dptmHtmlName,headings = headings,data = data)
+
+@app.route("/fruitinfo",methods=["POST"])
+def GetfruitInfo():
+    print("info is added")
+    #FileName = "Fruit.doc"
+    #HtmlName = "Fruit.html"
+    return SecGeneralProcess(FileName,HtmlName)
+    
+def SecGeneralProcess(dptmFileName,dptmHtmlName):
+    GetProductInfo();
+    AddProductInfo(dptmFileName);
+    Retrieve(dptmFileName);
+    headings = ("Image","Product","Price","Unit")
+    return render_template(dptmHtmlName,headings = headings,data = data)
+
+def GetProductInfo():
+    global pimage,pname,pprice,punit;
+    pimage = request.form.get('Selectimg');
+    pname = request.form.get('txtproductname');
+    pprice = request.form.get('txtproductprice');
+    punit = request.form.get('txtunit');
+
+def AddProductInfo(thefile):
+    IfExist(thefile);
+    if(TorF == "false"):
+        adminfile = open(thefile,"x");
+        adminfile.close();
+    WriteInfo(thefile);
+
+def WriteInfo(file):
+    adminfile = open(file,"r+")
+    allInfo = adminfile.read();
+    thelength = len(allInfo);
+    if(thelength == 0):
+        adminfile = open(file,"w")
+        adminfile.write(str(pimage) + ";" + str(pname) + ";" + str(pprice) + ";" + str(punit));
+    else:
+        adminfile = open(file,"a")
+        adminfile.write(";" + str(pimage) + ";" + str(pname) + ";" + str(pprice) + ";" + str(punit));
+    adminfile.close()
+
+def Retrieve(theFile):
+    global data,productarray,pricearray,imagearray,unitarray
+    data = [];
+    productarray = [];
+    pricearray = [];
+    imagearray = [];
+    unitarray = [];
+    adminfile = open(theFile,"r+")
+    allInfo = adminfile.read().split(";");
+    length = (len(allInfo)/4);
+    num = 0
+    
+    for i in range(int(length)):
+        theimage = allInfo[num]
+        thename = allInfo[num+1]
+        theprice = allInfo[num+2]
+        theunit = allInfo[num+3]
+        subdata = [];
+
+        subdata.append(theimage)
+        subdata.append(thename)
+        subdata.append(theprice)
+        subdata.append(theunit)
+
+        imagearray.append(theimage)
+        productarray.append(thename)
+        pricearray.append(theprice)
+        unitarray.append(theunit)
+
+        num = num+4
+        data.append(subdata)
+        print(data)
+    print(data[1])
+
+@app.route("/poultry")
+def poultry():
+    global FileName,HtmlName
+    FileName = "Poultry.doc"
+    HtmlName = "poultry.html"
+    print("Welcome to poultry section")
+    return GeneralProcess(FileName,HtmlName)
+        
+@app.route("/poultryinfo",methods=["POST"])
+def GetpoultryInfo():
+    print("info is added")
+    #FileName = "Poultry.doc"
+    #HtmlName = "poultry.html"
+    return SecGeneralProcess(FileName,HtmlName)
+
+@app.route("/meat")
+def meat():
+    global FileName,HtmlName
+    FileName = "Meat.doc"
+    HtmlName = "Meat.html"
+    print("Welcome to meat section")
+    return GeneralProcess(FileName,HtmlName)
+        
+@app.route("/meatinfo",methods=["POST"])
+def GetMeatInfo():
+    print("info is added")
+    #FileName = "Meat.doc"
+    #HtmlName = "Meat.html"
+    return SecGeneralProcess(FileName,HtmlName)
+
+@app.route("/beverage")
+def beverage():
+    global FileName,HtmlName
+    FileName = "Beverage.doc"
+    HtmlName = "Beverage.html"
+    print("Welcome to beverage section")
+    return GeneralProcess(FileName,HtmlName)
+        
+@app.route("/beverageinfo",methods=["POST"])
+def GetBeverageInfo():
+    print("info is added")
+    #FileName = "Beverage.doc"
+    #HtmlName = "Beverage.html"
+    return SecGeneralProcess(FileName,HtmlName)
+
+@app.route("/frozenfood")
+def frozenfood():
+    global FileName,HtmlName
+    FileName = "Frozenfood.doc"
+    HtmlName = "Frozenfood.html"
+    print("Welcome to frozen food section")
+    return GeneralProcess(FileName,HtmlName)
+        
+@app.route("/frozenfoodinfo",methods=["POST"])
+def GetFrozenfoodInfo():
+    print("info is added")
+    #FileName = "Frozenfood.doc"
+    #HtmlName = "Frozenfood.html"
+    return SecGeneralProcess(FileName,HtmlName)
+
+@app.route("/dietaryfood")
+def dietaryfood():
+    global FileName,HtmlName
+    FileName = "Dietaryfood.doc"
+    HtmlName = "Dietaryfood.html"
+    print("Welcome to dietary food section")
+    return GeneralProcess(FileName,HtmlName)
+        
+@app.route("/dietaryfoodinfo",methods=["POST"])
+def GetDietaryfoodInfo():
+    print("info is added")
+    #FileName = "Dietaryfood.doc"
+    #HtmlName = "Dietaryfood.html"
+    return SecGeneralProcess(FileName,HtmlName)
+
+@app.route("/kosher")
+def kosher():
+    global FileName,HtmlName
+    FileName = "Kosher.doc"
+    HtmlName = "Kosher.html"
+    print("Welcome to kosher section")
+    return GeneralProcess(FileName,HtmlName)
+        
+@app.route("/kosherinfo",methods=["POST"])
+def GetKosherInfo():
+    print("info is added")
+    #FileName = "Kosher.doc"
+    #HtmlName = "Kosher.html"
+    return SecGeneralProcess(FileName,HtmlName)
+
+@app.route("/halal")
+def halal():
+    global FileName,HtmlName
+    FileName = "Halal.doc"
+    HtmlName = "Halal.html"
+    print("Welcome to halal section")
+    return GeneralProcess(FileName,HtmlName)
+
+@app.route("/halalinfo",methods=["POST"])
+def GetHalalInfo():
+    print("info is added")
+    #FileName = "Halal.doc"
+    #HtmlName = "Halal.html"
+    return SecGeneralProcess(FileName,HtmlName)
+
+@app.route("/adminhome")
+def AdminHome():
+    return render_template('DepartmentsAdmin.html',username=username)
+
+#####CONTROL USER DPTM HTMLS#####
+
+@app.route("/Ufruit",methods=["POST"])
+def userfruit():
+    global FileName,selectedproduct
+    FileName = "Fruit.doc"
+    print("Welcome to fruit section USER")
+    IfExist(FileName);
+    if(TorF == "false"):
+        return render_template("EmptyDepartment.html");
+    else:
+        adminfile = open(FileName,"r+")
+        allInfo = adminfile.read();
+        thelength = len(allInfo);
+        if(thelength == 0):
+            return render_template("UserFruit.html");
+        else:
+            Retrieve(FileName);
+            listofproducts = []
+            for i in range(0,len(productarray)):
+                listofproducts.append(str(i+1) + ". " + productarray[i])
+            #pricearray
+            selectedproduct = request.form.get('productdropdown');
+            headings = ("Image","Product","Price","Unit")
+            return render_template("UserFruit.html",headings = headings,data = data,listofproducts = listofproducts)
+
+@app.route("/checkprice",methods=["GET","POST"])
+def CheckPrice():
+    print("Hel")
+    print(selectedproduct)
+    character = selectedproduct.split("");
+    productprice = pricearray[int(character)-1]
+    print(productprice)
+    return render_template('DepartmentsUser.html',username = FileName)
+
+@app.route("/userhome")
+def UserHome():
+    return render_template('DepartmentsUser.html',username = username)
+    
+if __name__ == "__main__":
+    app.run();
+
+
+
+
+
